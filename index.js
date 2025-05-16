@@ -20,10 +20,38 @@ app.get("/", function (req, res) {
 
 
 // your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
-});
+app.get("/api/:date?", (req, res, next) => {
 
+  let getDate = req.params.date
+  
+  //Verificar si el parametro date no esta vacio
+  if(!getDate){
+    //Paremetro date vacio, usando la fecha actual
+    getDate = new Date();
+  }
+
+  //Validar el formato de date
+  else if(isNaN(new Date(getDate)) && isNaN(new Date(Number(getDate)))){
+    res.json({ error : "Invalid Date" })
+  }
+
+  else{
+    if(isNaN(new Date(getDate))){
+      getDate = parseInt(getDate);
+    }
+  }
+
+  req.timeUnix = new Date(getDate).getTime();
+  req.timeUtc = new Date(getDate).toUTCString();
+  
+  next()
+
+}, (req, res)=>{
+  res.json({
+    unix: req.timeUnix,
+    utc: req.timeUtc
+  });
+});
 
 
 // Listen on port set in environment variable or default to 3000
